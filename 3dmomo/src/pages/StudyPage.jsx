@@ -3,27 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment, Grid, ContactShadows, TransformControls } from '@react-three/drei';
 import * as THREE from 'three';
-import { Box, ArrowRight, RotateCcw, Move, Rotate3D, Maximize, FileText, CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { Button } from '../components/Button';
-import { GlassCard } from '../components/GlassCard';
+import {
+    Box, ChevronLeft, ChevronRight, ChevronDown,
+    RotateCw, ZoomIn, Bookmark, BookmarkCheck,
+    Download, MessageSquare, FileText, RefreshCw,
+    Send, Move, Rotate3D, Maximize, Eye, EyeOff, CheckCircle, Info
+} from 'lucide-react';
 
 /* -------------------------------------------------------------------------- */
-/* 하위 컴포넌트                                                               */
+/* 3D 관련 컴포넌트                                                            */
 /* -------------------------------------------------------------------------- */
-
-const ToolbarBtn = ({ icon: Icon, active, onClick, tooltip }) => (
-    <button
-        onClick={onClick}
-        className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${
-            active
-                ? 'bg-[rgb(0,255,133)] text-black shadow-[0_0_15px_rgba(0,255,133,0.4)]'
-                : 'text-white/60 hover:bg-white/10 hover:text-white'
-        }`}
-        title={tooltip}
-    >
-        <Icon className="w-5 h-5" />
-    </button>
-);
 
 function CameraRig({ targetPosition }) {
     const { camera, controls } = useThree();
@@ -60,15 +49,7 @@ function DraggablePart({ part, explosion, isSelected, onSelect, transformMode, o
                 <TransformControls
                     object={meshRef}
                     mode={transformMode}
-                    onMouseUp={() => {
-                        if (meshRef.current) {
-                            const { x, y, z } = meshRef.current.position;
-                            const { x: rx, y: ry, z: rz } = meshRef.current.rotation;
-                            console.log(`\n🚀 [ID: ${part.id}] 정밀 데이터:`);
-                            console.log(`defaultPos: [${x.toFixed(4)}, ${y.toFixed(4)}, ${z.toFixed(4)}],`);
-                            console.log(`rotation: [${rx.toFixed(4)}, ${ry.toFixed(4)}, ${rz.toFixed(4)}],`);
-                        }
-                    }}
+                    onMouseUp={() => { /* 좌표 로그 */ }}
                 />
             )}
             <primitive
@@ -96,36 +77,44 @@ export default function StudyPage() {
     // 상태 관리
     const [explosion, setExplosion] = useState(0);
     const [selectedId, setSelectedId] = useState(null);
-    const [transformMode, setTransformMode] = useState("translate"); // translate | rotate
+    const [transformMode, setTransformMode] = useState("translate");
     const [focusTarget, setFocusTarget] = useState(null);
-    const [isNoteOpen, setIsNoteOpen] = useState(false);
-    const [userNote, setUserNote] = useState('');
     const [checkedGroups, setCheckedGroups] = useState({});
 
-    // ✅ 복구된 18개 부품 데이터 (사용자님의 원본 데이터)
+    // UI 상태
+    const [mainTab, setMainTab] = useState('ai');
+    const [activeAiTab, setActiveAiTab] = useState('explain');
+    const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+    const [rightPanelOpen, setRightPanelOpen] = useState(true);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [aiInput, setAiInput] = useState('');
+    const [userNote, setUserNote] = useState('');
+
+    // ✅ 부품 데이터 (Description 추가됨)
     const assemblyParts = useMemo(() => [
-        { id: "base_gear", url: "/models/BaseGear.glb", defaultPos: [0.0076, 0.0178, -0.0027], direction: [0, -0.2, 0], rotation: [0.0000, -1.5706, 0.0000] },
-        { id: "mounting_bracket", url: "/models/BaseMountingbracket.glb", defaultPos: [0.0101, -0.0053, 0.0060], direction: [0, 0.2, 0], rotation: [-0.1133, 1.5241, 1.6775] },
-        { id: "base_plate", url: "/models/BasePlate.glb", defaultPos: [0, 0, 0], direction: [0, -0.2, 0], rotation: [0, 0, 0] },
-        { id: "gear_link_1", url: "/models/Gearlink1.glb", defaultPos: [0.0136, 0.0378, 0.0048], direction: [0.2, 0.2, 0], rotation: [1.5754, -0.0569, -1.5434] },
-        { id: "gear_link_2", url: "/models/Gearlink2.glb", defaultPos: [-0.0136, 0.0378, 0.0062], direction: [-0.2, 0.2, 0], rotation: [-3.1374, -0.0061, -1.7756] },
-        { id: "link_L", url: "/models/Link.glb", defaultPos: [-0.0064, 0.0740, 0.0048], direction: [-0.3, 0.1, 0], rotation: [-1.5713, -0.0883, -1.5496] },
-        { id: "link_R", url: "/models/Link.glb", defaultPos: [0.0060, 0.0739, 0.0049], direction: [0.3, 0.1, 0], rotation: [-1.5634, 0.0671, -1.5615] },
-        { id: "gripper_L", url: "/models/Gripper.glb", defaultPos: [-0.0031, 0.0870, 0.0000], direction: [-0.3, 0, 0.2], rotation: [-0.0002, 0.0284, 1.1878] },
-        { id: "gripper_R", url: "/models/Gripper.glb", defaultPos: [0.0027, 0.0870, 0.0012], direction: [0.3, 0, 0.2], rotation: [-3.1414, -0.0374, -1.9538] },
-        { id: "Pin_01", url: "/models/Pin.glb", defaultPos: [0.0052, 0.0585, 0.0024], direction: [0.2, 0.2, 0.2], rotation: [3.1416, -1.5402, 3.1416] },
-        { id: "Pin_02", url: "/models/Pin.glb", defaultPos: [-0.0075, 0.0895, 0.0024], direction: [-0.2, 0.2, 0.2], rotation: [3.1416, -1.5402, 3.1416] },
-        { id: "Pin_03", url: "/models/Pin.glb", defaultPos: [0.0154, 0.0689, 0.0020], direction: [0.2, 0.2, -0.2], rotation: [3.1416, -1.5402, 3.1416] },
-        { id: "Pin_04", url: "/models/Pin.glb", defaultPos: [-0.0154, 0.0689, 0.0020], direction: [-0.2, 0.2, -0.2], rotation: [3.1416, -1.5402, 3.1416] },
-        { id: "Pin_05", url: "/models/Pin.glb", defaultPos: [0.0073, 0.0894, 0.0024], direction: [0.3, 0.1, 0], rotation: [3.1416, -1.5402, 3.1416] },
-        { id: "Pin_06", url: "/models/Pin.glb", defaultPos: [-0.0136, 0.0377, 0.0025], direction: [-0.3, 0.1, 0], rotation: [3.1416, -1.5402, 3.1416] },
-        { id: "Pin_07", url: "/models/Pin.glb", defaultPos: [0.0141, 0.0377, 0.0025], direction: [0, 0.1, 0.3], rotation: [3.1416, -1.5402, 3.1416] },
-        { id: "Pin_08", url: "/models/Pin.glb", defaultPos: [-0.0048, 0.0584, 0.0024], direction: [0, 0.1, -0.3], rotation: [3.1416, -1.5402, 3.1416] },
-        { id: "Pin_09", url: "/models/Pin.glb", defaultPos: [0.0053, 0.0034, 0.0022], direction: [0.1, 0, 0.2], rotation: [3.1416, -1.5402, 3.1416] },
-        { id: "Pin_10", url: "/models/Pin.glb", defaultPos: [-0.0053, 0.0034, 0.0022], direction: [-0.1, 0, 0.2], rotation: [3.1416, -1.5402, 3.1416] },
+        { id: "base_gear", url: "/models/BaseGear.glb", defaultPos: [0.0076, 0.0178, -0.0027], direction: [0, -0.2, 0], rotation: [0.0000, -1.5706, 0.0000], description: "동력을 전달하는 메인 기어입니다. 고강도 강철로 제작되어 높은 토크를 견딜 수 있습니다." },
+        { id: "mounting_bracket", url: "/models/BaseMountingbracket.glb", defaultPos: [0.0101, -0.0053, 0.0060], direction: [0, 0.2, 0], rotation: [-0.1133, 1.5241, 1.6775], description: "전체 구조물을 지지하고 고정하는 베이스 브래킷입니다." },
+        { id: "base_plate", url: "/models/BasePlate.glb", defaultPos: [0, 0, 0], direction: [0, -0.2, 0], rotation: [0, 0, 0], description: "조립품의 기초가 되는 바닥 플레이트입니다. 진동을 흡수하는 역할을 합니다." },
+        { id: "gear_link_1", url: "/models/Gearlink1.glb", defaultPos: [0.0136, 0.0378, 0.0048], direction: [0.2, 0.2, 0], rotation: [1.5754, -0.0569, -1.5434], description: "기어와 연결되어 회전 운동을 직선 운동으로 변환하는 첫 번째 링크입니다." },
+        { id: "gear_link_2", url: "/models/Gearlink2.glb", defaultPos: [-0.0136, 0.0378, 0.0062], direction: [-0.2, 0.2, 0], rotation: [-3.1374, -0.0061, -1.7756], description: "반대쪽 기어와 연결되는 두 번째 링크입니다." },
+        { id: "link_L", url: "/models/Link.glb", defaultPos: [-0.0064, 0.0740, 0.0048], direction: [-0.3, 0.1, 0], rotation: [-1.5713, -0.0883, -1.5496], description: "그리퍼를 작동시키는 왼쪽 링크 암입니다." },
+        { id: "link_R", url: "/models/Link.glb", defaultPos: [0.0060, 0.0739, 0.0049], direction: [0.3, 0.1, 0], rotation: [-1.5634, 0.0671, -1.5615], description: "그리퍼를 작동시키는 오른쪽 링크 암입니다." },
+        { id: "gripper_L", url: "/models/Gripper.glb", defaultPos: [-0.0031, 0.0870, 0.0000], direction: [-0.3, 0, 0.2], rotation: [-0.0002, 0.0284, 1.1878], description: "물체를 잡는 역할을 하는 왼쪽 그리퍼(집게)입니다." },
+        { id: "gripper_R", url: "/models/Gripper.glb", defaultPos: [0.0027, 0.0870, 0.0012], direction: [0.3, 0, 0.2], rotation: [-3.1414, -0.0374, -1.9538], description: "물체를 잡는 역할을 하는 오른쪽 그리퍼(집게)입니다." },
+        { id: "Pin_01", url: "/models/Pin.glb", defaultPos: [0.0052, 0.0585, 0.0024], direction: [0.2, 0.2, 0.2], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
+        // ... (나머지 핀들은 동일한 설명 사용)
+        { id: "Pin_02", url: "/models/Pin.glb", defaultPos: [-0.0075, 0.0895, 0.0024], direction: [-0.2, 0.2, 0.2], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
+        { id: "Pin_03", url: "/models/Pin.glb", defaultPos: [0.0154, 0.0689, 0.0020], direction: [0.2, 0.2, -0.2], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
+        { id: "Pin_04", url: "/models/Pin.glb", defaultPos: [-0.0154, 0.0689, 0.0020], direction: [-0.2, 0.2, -0.2], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
+        { id: "Pin_05", url: "/models/Pin.glb", defaultPos: [0.0073, 0.0894, 0.0024], direction: [0.3, 0.1, 0], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
+        { id: "Pin_06", url: "/models/Pin.glb", defaultPos: [-0.0136, 0.0377, 0.0025], direction: [-0.3, 0.1, 0], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
+        { id: "Pin_07", url: "/models/Pin.glb", defaultPos: [0.0141, 0.0377, 0.0025], direction: [0, 0.1, 0.3], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
+        { id: "Pin_08", url: "/models/Pin.glb", defaultPos: [-0.0048, 0.0584, 0.0024], direction: [0, 0.1, -0.3], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
+        { id: "Pin_09", url: "/models/Pin.glb", defaultPos: [0.0053, 0.0034, 0.0022], direction: [0.1, 0, 0.2], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
+        { id: "Pin_10", url: "/models/Pin.glb", defaultPos: [-0.0053, 0.0034, 0.0022], direction: [-0.1, 0, 0.2], rotation: [3.1416, -1.5402, 3.1416], description: "부품 간의 회전축 역할을 하는 고정 핀입니다." },
     ], []);
 
-    // 그룹화 및 가시성 로직
+    // 로직
     const groupedParts = useMemo(() => {
         const groups = {};
         assemblyParts.forEach(part => {
@@ -168,117 +157,195 @@ export default function StudyPage() {
         }
     };
 
+    // ✅ 선택된 부품 정보 가져오기
+    const selectedPartInfo = useMemo(() =>
+            assemblyParts.find(p => p.id === selectedId),
+        [selectedId, assemblyParts]);
+
     const activeCheckedNames = Object.keys(checkedGroups)
         .filter(url => checkedGroups[url])
         .map(url => getPartName(url));
 
+    const handleAiSubmit = (e) => {
+        e.preventDefault();
+        setAiInput('');
+    };
+
     return (
-        <div className="flex flex-col h-screen w-screen bg-[#020617] text-white overflow-hidden font-sans">
-            {/* 1. 헤더 */}
-            <header className="h-16 border-b border-white/10 bg-black/50 backdrop-blur-md flex items-center justify-between px-6 z-50">
-                <div className="flex items-center gap-8">
-                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <Box className="w-6 h-6 text-[rgb(0,255,133)]" />
-                        <span className="text-xl font-bold tracking-wide">SIMVEX</span>
+        <div className="h-screen bg-black flex flex-col overflow-hidden font-sans text-white">
+
+            {/* 1. Header */}
+            <header className="flex-shrink-0 bg-[rgba(10,10,10,0.95)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.08)]">
+                <div className="px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate('/browse')}
+                            className="flex items-center gap-2 text-[rgba(255,255,255,0.7)] hover:text-[rgb(0,255,133)] transition-colors"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                            <span className="text-sm font-medium">돌아가기</span>
+                        </button>
+                        <div className="h-6 w-px bg-[rgba(255,255,255,0.1)]" />
+                        <div className="flex items-center gap-2">
+                            <Box className="w-5 h-5 text-[rgb(0,255,133)]" />
+                            <div>
+                                <h4 className="text-white font-semibold">Precision Assembly</h4>
+                                <p className="text-xs text-[rgba(255,255,255,0.5)]">기계 공학</p>
+                            </div>
+                        </div>
                     </div>
-                    <nav className="flex gap-6">
-                        <button className="text-[rgb(0,255,133)] border-b-2 border-[rgb(0,255,133)] pb-1 text-sm font-bold">STUDY</button>
-                        <button className="text-white/60 hover:text-white transition-colors text-sm font-medium">CAD</button>
-                    </nav>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsBookmarked(!isBookmarked)}
+                            className={`px-4 py-2 bg-transparent border rounded-lg transition-colors text-sm flex items-center gap-2 ${
+                                isBookmarked
+                                    ? 'border-[rgb(0,255,133)] text-[rgb(0,255,133)]'
+                                    : 'border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.7)] hover:border-[rgb(0,255,133)] hover:text-[rgb(0,255,133)]'
+                            }`}
+                        >
+                            {isBookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+                            북마크
+                        </button>
+                        <button className="w-9 h-9 flex items-center justify-center bg-transparent border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.7)] rounded-lg hover:border-[rgb(0,255,133)] hover:text-[rgb(0,255,133)] transition-colors">
+                            <Download className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            <main className="flex-1 flex min-h-0 relative">
-                {/* 2. 왼쪽 사이드바 (GlassCard 적용) */}
-                <aside className="w-80 bg-black/40 backdrop-blur-xl border-r border-white/10 flex flex-col z-40">
-                    <div className="p-5 border-b border-white/10">
-                        <h3 className="text-xs font-bold text-[rgb(0,255,133)] tracking-widest uppercase">COMPONENTS</h3>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                        {Object.entries(groupedParts).map(([url, parts]) => (
-                            <div
-                                key={url}
-                                className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
-                                    checkedGroups[url]
-                                        ? 'bg-[rgba(0,255,133,0.1)] border-[rgba(0,255,133,0.3)]'
-                                        : 'border-transparent hover:bg-white/5'
-                                }`}
-                                onClick={() => setSelectedId(parts[0].id)}
-                                onDoubleClick={() => handleDoubleClick(url)}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        className={`w-4 h-4 rounded border flex items-center justify-center cursor-pointer ${
-                                            checkedGroups[url]
-                                                ? 'bg-[rgb(0,255,133)] border-[rgb(0,255,133)]'
-                                                : 'border-white/30'
-                                        }`}
-                                        onClick={(e) => { e.stopPropagation(); toggleCheckbox(url); }}
-                                    >
-                                        {checkedGroups[url] && <CheckCircle className="w-3 h-3 text-black" />}
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className={`text-sm ${selectedId === parts[0].id ? 'text-[rgb(0,255,133)] font-bold' : 'text-white/70'}`}>
-                                            {getPartName(url)}
-                                        </span>
-                                        {parts.length > 1 && <span className="text-[10px] text-white/40">x{parts.length}</span>}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); toggleGroupVisibility(url); }}
-                                    className="text-white/40 hover:text-white"
-                                >
-                                    {visibleParts[parts[0].id] ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                                </button>
+            {/* Main Content Layout */}
+            <div className="flex-1 flex overflow-hidden relative">
+
+                {/* 2. Left Sidebar */}
+                <aside
+                    className={`flex-shrink-0 border-r border-[rgba(255,255,255,0.08)] bg-[rgba(5,5,5,0.8)] flex flex-col transition-all duration-300 z-40 overflow-hidden ${
+                        leftPanelOpen ? 'w-72' : 'w-0'
+                    }`}
+                >
+                    <div className="w-72 flex flex-col h-full">
+                        <div className="flex-1 overflow-y-auto p-5">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-sm font-semibold text-white">부품 목록</h3>
+                                <span className="text-xs text-[rgba(255,255,255,0.5)]">{Object.keys(groupedParts).length}개 그룹</span>
                             </div>
-                        ))}
+
+                            <div className="space-y-2">
+                                {Object.entries(groupedParts).map(([url, parts]) => {
+                                    const partName = getPartName(url);
+                                    const isGroupVisible = visibleParts[parts[0].id];
+                                    const isChecked = !!checkedGroups[url];
+
+                                    return (
+                                        <div key={url} className="border border-[rgba(255,255,255,0.08)] rounded-lg overflow-hidden bg-[rgba(255,255,255,0.02)]">
+                                            <div
+                                                className={`flex items-center px-4 py-3 hover:bg-[rgba(0,255,133,0.05)] transition-colors cursor-pointer ${selectedId === parts[0].id ? 'bg-[rgba(0,255,133,0.1)]' : ''}`}
+                                                onClick={() => setSelectedId(parts[0].id)}
+                                                onDoubleClick={() => handleDoubleClick(url)}
+                                            >
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); toggleCheckbox(url); }}
+                                                    className="mr-3 flex-shrink-0"
+                                                >
+                                                    <div className={`w-4 h-4 rounded border-2 transition-all flex items-center justify-center ${
+                                                        isChecked
+                                                            ? 'bg-[rgb(0,255,133)] border-[rgb(0,255,133)]'
+                                                            : 'border-[rgba(255,255,255,0.3)] hover:border-[rgb(0,255,133)]'
+                                                    }`}>
+                                                        {isChecked && <CheckCircle className="w-3 h-3 text-black" />}
+                                                    </div>
+                                                </button>
+
+                                                <div className="flex-1 flex items-center justify-between text-left">
+                                                    <span className={`text-sm ${selectedId === parts[0].id ? 'text-[rgb(0,255,133)] font-bold' : 'text-white'}`}>
+                                                        {partName}
+                                                    </span>
+                                                    <button onClick={(e) => { e.stopPropagation(); toggleGroupVisibility(url); }}>
+                                                        {isGroupVisible
+                                                            ? <Eye className="w-4 h-4 text-[rgba(255,255,255,0.5)] hover:text-white" />
+                                                            : <EyeOff className="w-4 h-4 text-[rgba(255,255,255,0.3)] hover:text-white" />
+                                                        }
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="flex-shrink-0 p-5 border-t border-[rgba(255,255,255,0.08)]">
+                            <button
+                                onClick={() => navigate('/browse')}
+                                className="w-full px-4 py-2 bg-[rgba(0,255,133,0.1)] border border-[rgba(0,255,133,0.3)] text-[rgb(0,255,133)] rounded-lg hover:bg-[rgba(0,255,133,0.15)] transition-colors text-sm"
+                            >
+                                모델 라이브러리
+                            </button>
+                        </div>
                     </div>
                 </aside>
 
-                {/* 3. 3D 뷰포트 (배경은 투명하게 하여 body 배경 사용) */}
-                <section className="flex-1 relative bg-[radial-gradient(circle_at_center,_rgba(0,40,20,0.4)_0%,_transparent_100%)]">
-                    {/* 툴바 */}
+                {/* Left Panel Toggle Button */}
+                <button
+                    onClick={() => setLeftPanelOpen(!leftPanelOpen)}
+                    className="absolute top-1/2 -translate-y-1/2 z-50 w-10 h-20 bg-[rgb(0,255,133)] hover:bg-[rgb(0,230,120)] rounded-r-lg flex items-center justify-center transition-all duration-300 shadow-[0_4px_20px_rgba(0,255,133,0.4)]"
+                    style={{ left: leftPanelOpen ? '288px' : '0px' }}
+                >
+                    {leftPanelOpen ? <ChevronLeft className="w-5 h-5 text-black" /> : <ChevronRight className="w-5 h-5 text-black" />}
+                </button>
+
+                {/* 3. Center (3D Viewer) */}
+                <main className="flex-1 flex flex-col relative min-w-0" style={{
+                    background: 'radial-gradient(ellipse at 20% 50%, rgba(0,255,133,0.08) 0%, rgba(0,0,0,0) 50%), radial-gradient(ellipse at 80% 50%, rgba(0,100,255,0.06) 0%, rgba(0,0,0,0) 50%), black'
+                }}>
+                    {/* 상단 툴바 */}
                     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50">
-                        <GlassCard className="flex items-center gap-2 px-4 py-2 !rounded-2xl">
-                            <ToolbarBtn icon={Move} active={transformMode === 'translate'} onClick={() => setTransformMode('translate')} tooltip="이동 (T)" />
-                            <ToolbarBtn icon={Rotate3D} active={transformMode === 'rotate'} onClick={() => setTransformMode('rotate')} tooltip="회전 (R)" />
+                        <div className="flex items-center gap-2 px-4 py-2 bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] rounded-2xl">
+                            <button onClick={() => setTransformMode('translate')} className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${transformMode === 'translate' ? 'bg-[rgb(0,255,133)] text-black' : 'text-white/60 hover:text-white'}`}>
+                                <Move className="w-5 h-5" />
+                            </button>
+                            <button onClick={() => setTransformMode('rotate')} className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${transformMode === 'rotate' ? 'bg-[rgb(0,255,133)] text-black' : 'text-white/60 hover:text-white'}`}>
+                                <Rotate3D className="w-5 h-5" />
+                            </button>
                             <div className="w-[1px] h-6 bg-white/10 mx-2" />
-                            <ToolbarBtn icon={Maximize} onClick={() => {}} tooltip="전체화면" />
-                            <ToolbarBtn icon={RotateCcw} onClick={() => {}} tooltip="초기화" />
-                        </GlassCard>
+                            <button className="w-10 h-10 flex items-center justify-center rounded-xl text-white/60 hover:text-white"><Maximize className="w-5 h-5" /></button>
+                        </div>
                     </div>
 
-                    <Canvas shadows camera={{ position: [0.8, 0.8, 0.8], fov: 35 }}>
-                        <Suspense fallback={null}>
-                            <CameraRig targetPosition={focusTarget} />
-                            <ambientLight intensity={0.5} />
-                            <spotLight position={[10, 10, 10]} intensity={1.5} castShadow />
-                            {/* 네온 그린 그리드 적용 */}
-                            <Grid infiniteGrid cellSize={0.01} sectionSize={0.05} sectionColor="#00ff85" cellColor="#0a0f0d" fadeDistance={2} opacity={0.2} />
-                            <group>
-                                {assemblyParts.map((part) => (
-                                    <DraggablePart
-                                        key={part.id}
-                                        part={part}
-                                        explosion={explosion}
-                                        isSelected={selectedId === part.id}
-                                        onSelect={setSelectedId}
-                                        transformMode={transformMode}
-                                        onPartClick={(id) => setSelectedId(id)}
-                                        isVisible={visibleParts[part.id]}
-                                    />
-                                ))}
-                            </group>
-                            <ContactShadows opacity={0.5} scale={10} blur={2} far={4} color="#00ff85" />
-                            <Environment preset="city" />
-                        </Suspense>
-                        <OrbitControls makeDefault minDistance={0.1} maxDistance={3} />
-                    </Canvas>
+                    <div className="flex-1 relative">
+                        <Canvas shadows camera={{ position: [0.8, 0.8, 0.8], fov: 35 }} className="bg-transparent">
+                            <Suspense fallback={null}>
+                                <CameraRig targetPosition={focusTarget} />
+                                <ambientLight intensity={0.5} />
+                                <spotLight position={[10, 10, 10]} intensity={1.5} castShadow />
+                                <Grid infiniteGrid cellSize={0.01} sectionSize={0.05} sectionColor="#00ff85" cellColor="#0a0f0d" fadeDistance={2} opacity={0.2} />
+                                <group>
+                                    {assemblyParts.map((part) => (
+                                        <DraggablePart
+                                            key={part.id}
+                                            part={part}
+                                            explosion={explosion}
+                                            isSelected={selectedId === part.id}
+                                            onSelect={setSelectedId}
+                                            transformMode={transformMode}
+                                            onPartClick={(id) => setSelectedId(id)}
+                                            isVisible={visibleParts[part.id]}
+                                        />
+                                    ))}
+                                </group>
+                                <ContactShadows opacity={0.5} scale={10} blur={2} far={4} color="#00ff85" />
+                                <Environment preset="city" />
+                            </Suspense>
+                            <OrbitControls makeDefault minDistance={0.1} maxDistance={3} />
+                        </Canvas>
+                    </div>
 
                     {/* 하단 슬라이더 */}
-                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-1/2 max-w-lg z-50">
-                        <GlassCard className="px-6 py-4 flex items-center gap-4">
-                            <span className="text-xs text-[rgb(0,255,133)] font-bold">EXPLODE</span>
+                    <div className="flex-shrink-0 px-6 py-4 border-t border-[rgba(255,255,255,0.08)] bg-[rgba(5,5,5,0.8)]">
+                        <div className="mb-4 flex items-center gap-4">
+                            <span className="text-xs font-medium text-[rgba(255,255,255,0.7)] whitespace-nowrap min-w-[80px]">
+                                폭발도
+                            </span>
                             <input
                                 type="range"
                                 min="0"
@@ -286,54 +353,180 @@ export default function StudyPage() {
                                 step="0.0001"
                                 value={explosion}
                                 onChange={(e) => setExplosion(parseFloat(e.target.value))}
-                                className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-[rgb(0,255,133)] [&::-webkit-slider-thumb]:rounded-full hover:[&::-webkit-slider-thumb]:scale-110 transition-all"
+                                className="flex-1 h-1 bg-[rgba(255,255,255,0.1)] rounded-lg appearance-none cursor-pointer"
+                                style={{
+                                    background: `linear-gradient(to right, rgb(0,255,133) 0%, rgb(0,255,133) ${(explosion/0.5)*100}%, rgba(255,255,255,0.1) ${(explosion/0.5)*100}%, rgba(255,255,255,0.1) 100%)`
+                                }}
                             />
-                        </GlassCard>
-                    </div>
-                </section>
+                            <span className="text-xs font-mono text-[rgb(0,255,133)] min-w-[40px] text-right">
+                                {Math.round((explosion/0.5)*100)}%
+                            </span>
+                        </div>
 
-                {/* 4. 오른쪽 사이드바 (AI 채팅) */}
-                <aside className="w-80 bg-black/40 backdrop-blur-xl border-l border-white/10 flex flex-col z-40">
-                    <div className="p-5 border-b border-white/10">
-                        <h3 className="text-xs font-bold text-[rgb(0,255,133)] tracking-widest uppercase">AI ANALYST</h3>
-                    </div>
-                    <div className="flex-1 p-5 overflow-y-auto">
-                        {activeCheckedNames.length > 0 ? (
-                            <div className="bg-[rgba(0,255,133,0.1)] border border-[rgba(0,255,133,0.3)] p-4 rounded-xl mb-4">
-                                <div className="text-[rgb(0,255,133)] text-xs font-bold mb-2 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-[rgb(0,255,133)] rounded-full animate-pulse"></div>
-                                    분석 대상
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {activeCheckedNames.map(name => (
-                                        <span key={name} className="px-2 py-1 bg-black/40 rounded text-[10px] text-white border border-white/10">
-                                            {name}
-                                        </span>
-                                    ))}
-                                </div>
+                        <div className="flex items-center justify-center gap-3 text-xs text-[rgba(255,255,255,0.5)]">
+                            <div className="px-4 py-2 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.15)] rounded-lg flex items-center gap-2">
+                                <RefreshCw className="w-4 h-4" /> <span>Rotate & Select</span>
                             </div>
-                        ) : (
-                            <div className="text-center text-white/40 text-xs mt-10 p-6 border border-dashed border-white/10 rounded-xl">
-                                왼쪽 리스트에서 부품을 선택하면<br/>AI가 구조를 분석합니다.
+                            <div className="px-4 py-2 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.15)] rounded-lg flex items-center gap-2">
+                                <ZoomIn className="w-4 h-4" /> <span>Scroll to zoom</span>
                             </div>
-                        )}
-                        {/* 여기에 AI 채팅 메시지나 분석 결과가 표시될 공간 */}
-                    </div>
-
-                    <div className="p-4 border-t border-white/10 bg-white/5">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="구조나 원리에 대해 질문하세요..."
-                                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[rgb(0,255,133)] outline-none placeholder:text-white/30"
-                            />
-                            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(0,255,133)] hover:text-white transition-colors">
-                                <ArrowRight className="w-4 h-4" />
-                            </button>
                         </div>
                     </div>
+                </main>
+
+                {/* Right Panel Toggle Button */}
+                <button
+                    onClick={() => setRightPanelOpen(!rightPanelOpen)}
+                    className="absolute top-1/2 -translate-y-1/2 z-50 w-10 h-20 bg-[rgb(0,255,133)] hover:bg-[rgb(0,230,120)] rounded-l-lg flex items-center justify-center transition-all duration-300 shadow-[0_4px_20px_rgba(0,255,133,0.4)]"
+                    style={{ right: rightPanelOpen ? '384px' : '0px' }}
+                >
+                    {rightPanelOpen ? <ChevronRight className="w-5 h-5 text-black" /> : <ChevronLeft className="w-5 h-5 text-black" />}
+                </button>
+
+                {/* 4. Right Sidebar (부품 설명 추가됨) */}
+                <aside
+                    className={`flex-shrink-0 border-l border-[rgba(255,255,255,0.08)] bg-[rgba(5,5,5,0.8)] flex flex-col transition-all duration-300 z-40 overflow-hidden ${
+                        rightPanelOpen ? 'w-96' : 'w-0'
+                    }`}
+                >
+                    <div className="w-96 flex flex-col h-full">
+                        {/* 탭 헤더 */}
+                        <div className="flex-shrink-0 px-5 pt-5 pb-3 border-b border-[rgba(255,255,255,0.08)]">
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setMainTab('ai')}
+                                    className={`flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                                        mainTab === 'ai'
+                                            ? 'bg-transparent border-b-2 border-[rgb(0,255,133)] text-[rgb(0,255,133)]'
+                                            : 'bg-transparent text-[rgba(255,255,255,0.6)] hover:text-[rgba(255,255,255,0.9)]'
+                                    }`}
+                                >
+                                    <MessageSquare className="w-4 h-4" /> AI 어시스턴트
+                                </button>
+                                <button
+                                    onClick={() => setMainTab('notes')}
+                                    className={`flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                                        mainTab === 'notes'
+                                            ? 'bg-transparent border-b-2 border-[rgb(0,255,133)] text-[rgb(0,255,133)]'
+                                            : 'bg-transparent text-[rgba(255,255,255,0.6)] hover:text-[rgba(255,255,255,0.9)]'
+                                    }`}
+                                >
+                                    <FileText className="w-4 h-4" /> 학습 노트
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* AI 탭 컨텐츠 */}
+                        {mainTab === 'ai' && (
+                            <>
+                                <div className="flex-shrink-0 p-5 border-b border-[rgba(255,255,255,0.08)]">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {['explain', 'function', 'assembly', 'theory'].map((tab) => (
+                                            <button
+                                                key={tab}
+                                                onClick={() => setActiveAiTab(tab)}
+                                                className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors capitalize ${
+                                                    activeAiTab === tab
+                                                        ? 'bg-[rgb(0,255,133)] text-black'
+                                                        : 'bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.08)]'
+                                                }`}
+                                            >
+                                                {tab}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button className="w-full mt-3 px-3 py-2 text-xs font-medium rounded-lg bg-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.08)] transition-colors">
+                                        Quiz
+                                    </button>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto p-5">
+                                    {/* ✅ 선택된 부품 상세 정보 표시 */}
+                                    {selectedPartInfo ? (
+                                        <div className="mb-4">
+                                            <div className="bg-[rgba(0,255,133,0.08)] border border-[rgba(0,255,133,0.3)] rounded-xl p-5 shadow-[0_0_20px_rgba(0,255,133,0.1)]">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <Info className="w-4 h-4 text-[rgb(0,255,133)]" />
+                                                    <h3 className="text-[rgb(0,255,133)] font-bold text-sm uppercase tracking-wide">
+                                                        {getPartName(selectedPartInfo.url)}
+                                                    </h3>
+                                                </div>
+                                                <p className="text-sm text-white/90 leading-relaxed">
+                                                    {selectedPartInfo.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="mb-4 p-5 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-xl text-center">
+                                            <p className="text-sm text-white/50">
+                                                3D 뷰어에서 부품을 클릭하면<br/>상세 설명이 표시됩니다.
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* 체크된 그룹 표시 */}
+                                    {activeCheckedNames.length > 0 && (
+                                        <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.1)] rounded-lg p-4 mb-4">
+                                            <div className="text-white/60 text-xs font-bold mb-2">체크된 그룹</div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {activeCheckedNames.map(name => (
+                                                    <span key={name} className="px-2 py-1 bg-white/5 rounded text-[10px] text-white/80 border border-white/10">{name}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg p-4">
+                                        <p className="text-sm text-[rgba(255,255,255,0.8)] leading-relaxed">
+                                            {activeAiTab === 'explain' && 'AI 어시스턴트: 궁금한 부품을 선택하거나 질문해주세요.'}
+                                            {activeAiTab === 'function' && '각 부품의 기능과 작동 원리를 상세히 설명해드립니다.'}
+                                            {activeAiTab === 'assembly' && '모델의 조립 순서와 각 부품의 결합 방식을 안내합니다.'}
+                                            {activeAiTab === 'theory' && '관련된 공학 이론과 원리를 깊이 있게 학습할 수 있습니다.'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <form onSubmit={handleAiSubmit} className="flex-shrink-0 p-5 border-t border-[rgba(255,255,255,0.08)]">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={aiInput}
+                                            onChange={(e) => setAiInput(e.target.value)}
+                                            placeholder="부품이나 구조에 대해 질문하세요..."
+                                            className="flex-1 px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white text-sm placeholder:text-[rgba(255,255,255,0.4)] focus:outline-none focus:border-[rgb(0,255,133)] transition-colors"
+                                        />
+                                        <button type="submit" className="w-10 h-10 flex items-center justify-center bg-[rgb(0,255,133)] text-black rounded-lg hover:bg-[rgb(0,230,120)] transition-colors flex-shrink-0">
+                                            <Send className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </form>
+                            </>
+                        )}
+
+                        {/* 노트 탭 컨텐츠 */}
+                        {mainTab === 'notes' && (
+                            <>
+                                <div className="flex-shrink-0 p-5 border-b border-[rgba(255,255,255,0.08)]">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-sm font-semibold text-white">나의 학습 노트</h4>
+                                        <button className="px-3 py-1.5 bg-transparent border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.7)] rounded-lg hover:border-[rgb(0,255,133)] hover:text-[rgb(0,255,133)] transition-colors text-xs flex items-center gap-2">
+                                            <Download className="w-3 h-3" /> PDF 내보내기
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex-1 p-5">
+                                    <textarea
+                                        value={userNote}
+                                        onChange={(e) => setUserNote(e.target.value)}
+                                        placeholder="학습 내용을 메모하세요..."
+                                        className="w-full h-full p-4 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white text-sm placeholder:text-[rgba(255,255,255,0.4)] resize-none focus:outline-none focus:border-[rgb(0,255,133)] transition-colors"
+                                    />
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </aside>
-            </main>
+            </div>
         </div>
     );
 }
