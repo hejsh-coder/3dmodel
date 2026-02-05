@@ -1,130 +1,425 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/Button';
+import { GlassCard } from '../components/GlassCard';
+import { Box, Settings, Cpu, Beaker, ArrowRight, Play, Eye, MessageSquare, BookOpen } from 'lucide-react';
 
 export default function LandingPage() {
     const navigate = useNavigate();
+    const [isVisible, setIsVisible] = useState(false);
 
-    // 카드 데이터: Comatis 스타일의 3D 아이콘 느낌과 네온 컬러 적용
-    const cards = [
-        { title: "Mechanical Eng", desc: "Simulation & Assembly", icon: "fa-gears", color: "text-blue-400", bg: "bg-blue-500/10", glow: "shadow-blue-500/50" },
-        { title: "Bio-Technology", desc: "Molecular Structures", icon: "fa-dna", color: "text-purple-400", bg: "bg-purple-500/10", glow: "shadow-purple-500/50" },
-        { title: "Cloud Computing", desc: "Server Architecture", icon: "fa-cloud", color: "text-gray-300", bg: "bg-white/10", glow: "shadow-white/50" },
-        { title: "AI Development", desc: "Neural Networks", icon: "fa-brain", color: "text-blue-500", bg: "bg-blue-600/10", glow: "shadow-blue-600/50" },
-        { title: "Architecture", desc: "Structural Dynamics", icon: "fa-city", color: "text-indigo-300", bg: "bg-indigo-400/10", glow: "shadow-indigo-400/50" },
-        { title: "Electronics", desc: "Circuit Design", icon: "fa-microchip", color: "text-emerald-300", bg: "bg-emerald-400/10", glow: "shadow-emerald-400/50" },
-        { title: "Data Analytics", desc: "Processing", icon: "fa-chart-pie", color: "text-yellow-400", bg: "bg-yellow-500/10", glow: "shadow-yellow-500/50" },
-        { title: "Security", desc: "Encryption", icon: "fa-shield-halved", color: "text-indigo-400", bg: "bg-indigo-500/10", glow: "shadow-indigo-500/50" },
-    ];
+    useEffect(() => {
+        // Trigger animations on mount
+        setTimeout(() => setIsVisible(true), 100);
+    }, []);
 
     return (
-        <div className="min-h-screen w-full relative bg-deep-space text-white overflow-hidden font-sans selection:bg-accent-gold/30">
+        <div className="min-h-screen relative overflow-hidden bg-[radial-gradient(ellipse_at_top,_rgba(0,40,20,0.4)_0%,_rgba(0,0,0,1)_50%,_rgba(0,0,0,1)_100%)] text-white">
+            {/* Left & Right Glow Points */}
+            <div className="absolute -left-40 top-1/4 w-[600px] h-[600px] bg-[rgb(0,255,133)] opacity-15 blur-[150px] rounded-full pointer-events-none" />
+            <div className="absolute -right-40 top-2/3 w-[500px] h-[500px] bg-[rgb(0,255,133)] opacity-12 blur-[140px] rounded-full pointer-events-none" />
 
-            {/* ✨ 배경 빛 번짐 효과 (Aurora Effect) */}
-            <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
-            <div className="absolute top-[10%] right-[10%] w-[400px] h-[400px] bg-accent-gold/10 rounded-full blur-[100px] pointer-events-none"></div>
+            {/* Geometric Decorations */}
+            <div className="absolute w-96 h-96 top-20 -right-48 opacity-30 rounded-full border border-[rgba(255,255,255,0.1)] pointer-events-none" />
+            <div className="absolute w-64 h-64 bottom-40 -left-32 opacity-20 rounded-full border border-[rgba(255,255,255,0.1)] pointer-events-none" />
+            <div className="absolute w-[600px] h-[600px] top-0 right-0 opacity-50 rounded-full bg-[radial-gradient(circle,rgba(0,255,133,0.15)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute w-[400px] h-[400px] bottom-0 left-0 opacity-40 rounded-full bg-[radial-gradient(circle,rgba(0,255,133,0.15)_0%,transparent_70%)] pointer-events-none" />
 
-            {/* 1. 네비게이션: 상단에 깔끔하게 배치 */}
-            <nav className="w-full flex items-center justify-between px-6 md:px-10 py-8 relative z-50">
-                <div className="flex items-center gap-2 cursor-pointer group">
-                    <div className="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">S</div>
-                    <span className="text-xl font-bold tracking-wide group-hover:text-gray-200 transition-colors">SIMVEX</span>
+            {/* Navigation */}
+            <nav
+                className="relative z-10 flex items-center justify-between px-8 py-6 transition-all duration-700"
+                style={{
+                    opacity: isVisible ? 1 : 0,
+                    transform: isVisible ? 'translateY(0)' : 'translateY(-20px)'
+                }}
+            >
+                <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-[rgb(0,255,133)] flex items-center justify-center">
+                        <Box className="w-6 h-6 text-black" />
+                    </div>
+                    <span className="text-2xl font-bold">
+            <span className="text-[rgb(0,255,133)]">SIMVEX</span>
+          </span>
                 </div>
-
-                {/* 데스크탑 메뉴 */}
-                <div className="hidden md:flex gap-10 text-sm font-medium text-gray-300">
-                    {['Home', 'About', 'Portfolio', 'Contact'].map((item) => (
-                        <button key={item} className="hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] transition-all">
-                            {item}
-                        </button>
-                    ))}
+                <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-8 text-sm">
+                    <button
+                        onClick={() => navigate('/')}
+                        className="text-white hover:text-[rgb(0,255,133)] transition-colors font-medium"
+                    >
+                        HOME
+                    </button>
+                    <button
+                        onClick={() => navigate('/browse')}
+                        className="text-[rgba(255,255,255,0.7)] hover:text-[rgb(0,255,133)] transition-colors font-medium"
+                    >
+                        MODELS
+                    </button>
                 </div>
-
-                <button
-                    onClick={() => navigate('/learning')}
-                    className="bg-white text-black font-semibold px-6 py-2.5 rounded-full hover:bg-gray-200 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all text-sm active:scale-95"
-                >
-                    Get Started
-                </button>
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" onClick={() => navigate('/login')}>
+                        로그인
+                    </Button>
+                    <Button variant="primary" onClick={() => navigate('/signup')}>
+                        시작하기
+                    </Button>
+                </div>
             </nav>
 
-            {/* 메인 컨테이너 */}
-            <div className="max-w-[1400px] mx-auto px-6 md:px-10 pb-20 relative z-10">
-
-                {/* 2. 히어로 섹션 (유리 패널 박스) */}
-                <div className="glass-panel rounded-[3rem] p-10 md:p-20 mb-10 flex flex-col md:flex-row items-center justify-between relative overflow-hidden min-h-[500px] transition-all duration-500 hover:shadow-[0_0_40px_rgba(139,92,246,0.1)]">
-
-                    {/* 왼쪽 텍스트 */}
-                    <div className="max-w-2xl z-10 relative">
-                        <h1 className="text-6xl md:text-8xl font-medium leading-[1.1] mb-8 tracking-tight">
-                            Innovate.<br/>
-                            Elevate.<br/>
-                            {/* 금색 그라데이션 텍스트 */}
-                            <span className="text-gradient-gold font-bold drop-shadow-sm">Transform.</span>
-                        </h1>
-                        <p className="text-gray-400 text-lg mb-10 max-w-lg leading-relaxed font-light">
-                            Simvex provides realistic 3D engineering simulations. <br className="hidden md:block"/>
-                            Break down complexity and visualize mechanisms in real-time.
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                            <button
-                                onClick={() => navigate('/learning')}
-                                className="bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-                            >
-                                Explore Solutions
-                            </button>
-                            <button className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 hover:border-white/50 transition-all group">
-                                <i className="fa-solid fa-arrow-down -rotate-45 text-white group-hover:rotate-0 transition-transform duration-300"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* 오른쪽 3D 추상 오브젝트 (Comatis 스타일의 유리 큐브 연출) */}
-                    <div className="hidden md:flex relative items-center justify-center">
-                        <div className="relative w-80 h-80">
-                            {/* 뒤쪽 글로우 */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 to-accent-gold/20 rounded-full blur-3xl animate-pulse"></div>
-
-                            {/* 3D 아이콘 (큐브) */}
-                            <i className="fa-solid fa-cube text-[300px] text-white/5 drop-shadow-[0_20px_50px_rgba(255,255,255,0.15)] icon-3d transform rotate-12 hover:rotate-45 transition-transform duration-[3s] cursor-pointer backdrop-blur-sm"></i>
-
-                            {/* 중앙 장식 아이콘 */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl animate-bounce drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
-                                🧊
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 3. 벤토 그리드 (Bento Grid) 섹션 - 유리 카드 */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-                    {cards.map((card, idx) => (
+            {/* Hero Section - COMPLEX TO SIMPLE FAST */}
+            <section className="relative z-10 min-h-[calc(100vh-88px)] flex items-center justify-center px-8 -mt-12">
+                <div className="max-w-7xl mx-auto w-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        {/* Left: Text Content */}
                         <div
-                            key={idx}
-                            onClick={() => navigate('/learning')}
-                            className="glass-panel p-8 rounded-[2rem] hover:bg-white/10 transition-all duration-300 cursor-pointer group flex flex-col justify-between h-64 hover:-translate-y-2 relative overflow-hidden"
+                            className="transition-all duration-1000 delay-200"
+                            style={{
+                                opacity: isVisible ? 1 : 0,
+                                transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(40px)'
+                            }}
                         >
-                            {/* 배경에 살짝 비치는 빛 */}
-                            <div className={`absolute top-0 right-0 w-32 h-32 ${card.bg} blur-[40px] rounded-full opacity-0 group-hover:opacity-40 transition-opacity duration-500`}></div>
+                            {/* Main Headline */}
+                            <h1 className="text-7xl font-bold leading-[1.1] mb-8">
+                                COMPLEX<br />
+                                <span className="text-[rgb(0,255,133)]">TO SIMPLE</span><br />
+                                FAST.
+                            </h1>
 
-                            {/* 아이콘: 3D 느낌의 박스 안에 배치 */}
-                            <div className={`w-16 h-16 rounded-2xl ${card.bg} border border-white/5 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-300 icon-3d shadow-inner`}>
-                                <i className={`fa-solid ${card.icon} ${card.color} drop-shadow-md`}></i>
-                            </div>
+                            {/* Subtitle */}
+                            <p className="text-xl text-[rgba(255,255,255,0.7)] mb-10">
+                                복잡한 공학 구조를 3D로 보고, AI에게 묻고, 노트로 정리하세요.
+                            </p>
 
-                            <div className="relative z-10">
-                                <h3 className="text-xl font-bold mb-2 group-hover:text-white transition-colors">{card.title}</h3>
-                                <p className="text-sm text-gray-400 leading-relaxed font-light group-hover:text-gray-300">{card.desc}</p>
-                            </div>
-
-                            {/* 우측 상단 화살표 (호버 시 등장) */}
-                            <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 group-hover:-translate-y-1">
-                                <i className="fa-solid fa-arrow-up-right text-white/50"></i>
+                            {/* CTA Buttons */}
+                            <div className="flex items-center gap-5">
+                                <Button
+                                    variant="primary"
+                                    size="md"
+                                    onClick={() => navigate('/signup')}
+                                    icon={<Play className="w-5 h-5" />}
+                                    className="text-lg px-8 py-6"
+                                >
+                                    Start Learning
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="md"
+                                    onClick={() => navigate('/browse')}
+                                    className="text-lg px-8 py-6"
+                                >
+                                    Explore Models
+                                </Button>
                             </div>
                         </div>
-                    ))}
+
+                        {/* Right: 3D Viewer Preview */}
+                        <div
+                            className="relative transition-all duration-1000 delay-400"
+                            style={{
+                                opacity: isVisible ? 1 : 0,
+                                transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(40px)'
+                            }}
+                        >
+                            <div className="absolute inset-0 bg-[rgb(0,255,133)] opacity-20 blur-[120px] rounded-full" />
+                            <GlassCard className="relative overflow-hidden" glow>
+                                <div className="aspect-[4/3] bg-[rgb(10,15,13)] rounded-lg flex items-center justify-center border border-[rgba(0,255,133,0.3)]">
+                                    <div className="text-center">
+                                        <Box className="w-24 h-24 mx-auto mb-4 text-[rgb(0,255,133)] animate-spin" style={{ animationDuration: '8s' }} />
+                                        <p className="text-[rgba(255,255,255,0.5)] text-lg">3D Viewer Preview</p>
+                                    </div>
+                                </div>
+                            </GlassCard>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* A workflow that keeps you in control Section */}
+            <section className="relative z-10 max-w-6xl mx-auto px-8 py-20">
+                <div
+                    className="text-center mb-12 transition-all duration-1000 delay-400"
+                    style={{
+                        opacity: isVisible ? 1 : 0,
+                        transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(30px)'
+                    }}
+                >
+                    <h2 className="mb-3 text-4xl font-bold">
+                        A workflow that keeps you in <span className="text-[rgb(0,255,133)]">control.</span>
+                    </h2>
+                    <p className="text-[rgba(255,255,255,0.6)] text-lg">
+                        학습 흐름을 제어하는 3가지 핵심 기능
+                    </p>
                 </div>
 
-            </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* 3D Card */}
+                    <div
+                        className="transition-all duration-1000 delay-500"
+                        style={{
+                            opacity: isVisible ? 1 : 0,
+                            transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(30px)'
+                        }}
+                    >
+                        <div className="bg-[rgba(15,15,15,0.8)] border border-[rgba(255,255,255,0.1)] rounded-2xl p-8 hover:border-[rgba(0,255,133,0.3)] transition-all duration-300 h-full">
+                            <div className="w-14 h-14 rounded-xl bg-[rgba(0,255,133,0.15)] border border-[rgba(0,255,133,0.3)] flex items-center justify-center mb-6">
+                                <Eye className="w-7 h-7 text-[rgb(0,255,133)]" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3">3D</h3>
+                            <p className="text-[rgba(255,255,255,0.6)] text-base leading-relaxed">
+                                회전, 줌, 분해 기능으로 부품과 조립품 구조를 직관적으로 탐색하고 이해합니다.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* AI Card */}
+                    <div
+                        className="transition-all duration-1000 delay-600"
+                        style={{
+                            opacity: isVisible ? 1 : 0,
+                            transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(30px)'
+                        }}
+                    >
+                        <div className="bg-[rgba(15,15,15,0.8)] border border-[rgba(255,255,255,0.1)] rounded-2xl p-8 hover:border-[rgba(0,255,133,0.3)] transition-all duration-300 h-full">
+                            <div className="w-14 h-14 rounded-xl bg-[rgba(0,255,133,0.15)] border border-[rgba(0,255,133,0.3)] flex items-center justify-center mb-6">
+                                <MessageSquare className="w-7 h-7 text-[rgb(0,255,133)]" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3">AI</h3>
+                            <p className="text-[rgba(255,255,255,0.6)] text-base leading-relaxed">
+                                궁금한 구조에 대해 즉시 질문하고 맞춤형 설명을 받습니다.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Notes Card */}
+                    <div
+                        className="transition-all duration-1000 delay-700"
+                        style={{
+                            opacity: isVisible ? 1 : 0,
+                            transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(30px)'
+                        }}
+                    >
+                        <div className="bg-[rgba(15,15,15,0.8)] border border-[rgba(255,255,255,0.1)] rounded-2xl p-8 hover:border-[rgba(0,255,133,0.3)] transition-all duration-300 h-full">
+                            <div className="w-14 h-14 rounded-xl bg-[rgba(0,255,133,0.15)] border border-[rgba(0,255,133,0.3)] flex items-center justify-center mb-6">
+                                <BookOpen className="w-7 h-7 text-[rgb(0,255,133)]" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3">Notes</h3>
+                            <p className="text-[rgba(255,255,255,0.6)] text-base leading-relaxed">
+                                학습 중 떠오른 아이디어와 핵심 내용을 바로 기록하고 저장합니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* How It Works Section - Pick → Explore → Ask & Note */}
+            <section className="relative z-10 max-w-6xl mx-auto px-8 py-16">
+                <div
+                    className="text-center mb-16 transition-all duration-1000 delay-500"
+                    style={{
+                        opacity: isVisible ? 1 : 0,
+                        transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(30px)'
+                    }}
+                >
+                    <h2 className="mb-4 text-3xl">
+                        Pick <ArrowRight className="inline-block w-7 h-7 mx-3 text-[rgba(255,255,255,0.5)]" />
+                        <span className="text-[rgb(0,255,133)]">Explore</span>
+                        <ArrowRight className="inline-block w-7 h-7 mx-3 text-[rgba(255,255,255,0.5)]" />
+                        Ask & Note
+                    </h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative">
+                    {/* Step 1 */}
+                    <div
+                        className="text-center transition-all duration-1000 delay-600"
+                        style={{
+                            opacity: isVisible ? 1 : 0,
+                            transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(40px)'
+                        }}
+                    >
+                        <div className="relative mb-6">
+                            <div className="w-24 h-24 mx-auto rounded-full border-2 border-[rgba(0,255,133,0.4)] bg-[rgba(0,255,133,0.05)] flex items-center justify-center relative">
+                                <div className="absolute inset-0 rounded-full bg-[rgba(0,255,133,0.15)] blur-xl"></div>
+                                <span className="relative text-[rgb(0,255,133)] text-3xl font-bold">1</span>
+                            </div>
+                        </div>
+                        <h3 className="mb-3 text-xl">모델 선택</h3>
+                        <p className="text-[rgba(255,255,255,0.7)] text-sm">
+                            학습하고 싶은 3D 모델<br />을 선택하세요
+                        </p>
+                    </div>
+
+                    {/* Arrow 1 */}
+                    <div className="hidden md:flex items-center justify-center absolute left-[28%] top-14">
+                        <ArrowRight className="w-6 h-6 text-[rgba(0,255,133,0.3)]" />
+                    </div>
+
+                    {/* Step 2 */}
+                    <div
+                        className="text-center transition-all duration-1000 delay-700"
+                        style={{
+                            opacity: isVisible ? 1 : 0,
+                            transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(40px)'
+                        }}
+                    >
+                        <div className="relative mb-6">
+                            <div className="w-24 h-24 mx-auto rounded-full border-2 border-[rgba(0,255,133,0.6)] bg-[rgba(0,255,133,0.08)] flex items-center justify-center relative">
+                                <div className="absolute inset-0 rounded-full bg-[rgba(0,255,133,0.2)] blur-xl"></div>
+                                <span className="relative text-[rgb(0,255,133)] text-3xl font-bold">2</span>
+                            </div>
+                        </div>
+                        <h3 className="mb-3 text-xl">3D 탐색</h3>
+                        <p className="text-[rgba(255,255,255,0.7)] text-sm">
+                            구조를 회전하고 분해하<br />며 관찰하세요
+                        </p>
+                    </div>
+
+                    {/* Arrow 2 */}
+                    <div className="hidden md:flex items-center justify-center absolute left-[61%] top-14">
+                        <ArrowRight className="w-6 h-6 text-[rgba(0,255,133,0.3)]" />
+                    </div>
+
+                    {/* Step 3 */}
+                    <div
+                        className="text-center transition-all duration-1000 delay-[800ms]"
+                        style={{
+                            opacity: isVisible ? 1 : 0,
+                            transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(40px)'
+                        }}
+                    >
+                        <div className="relative mb-6">
+                            <div className="w-24 h-24 mx-auto rounded-full border-2 border-[rgba(0,255,133,0.8)] bg-[rgba(0,255,133,0.1)] flex items-center justify-center relative">
+                                <div className="absolute inset-0 rounded-full bg-[rgba(0,255,133,0.25)] blur-xl"></div>
+                                <span className="relative text-[rgb(0,255,133)] text-3xl font-bold">3</span>
+                            </div>
+                        </div>
+                        <h3 className="mb-3 text-xl">AI 질문 & 노트</h3>
+                        <p className="text-[rgba(255,255,255,0.7)] text-sm">
+                            궁금한 점을 질문하고 학습 내<br />용을 기록하세요
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* Categories Section - 이런 분야를 공부하시나요? */}
+            <section className="relative z-10 max-w-5xl mx-auto px-8 py-16">
+                <div
+                    className="text-center mb-12 transition-all duration-1000 delay-[900ms]"
+                    style={{
+                        opacity: isVisible ? 1 : 0,
+                        transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(30px)'
+                    }}
+                >
+                    <h2 className="mb-3 text-3xl">
+                        이런 분야를 <span className="text-[rgb(0,255,133)]">공부하시나요?</span>
+                    </h2>
+                    <p className="text-[rgba(255,255,255,0.7)] text-base">
+                        다양한 공학 분야의 모델을 제공합니다
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    <div
+                        className="transition-all duration-1000 delay-[1000ms]"
+                        style={{
+                            opacity: isVisible ? 1 : 0,
+                            transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(30px)'
+                        }}
+                    >
+                        <GlassCard hover className="text-center">
+                            <div className="w-16 h-16 mx-auto rounded-xl bg-[rgba(0,255,133,0.15)] border border-[rgba(0,255,133,0.3)] flex items-center justify-center mb-5">
+                                <Settings className="w-8 h-8 text-[rgb(0,255,133)]" />
+                            </div>
+                            <h3 className="mb-2 text-lg">기계공학</h3>
+                            <p className="text-[rgba(255,255,255,0.7)] text-sm">
+                                엔진, 서스펜션 등
+                            </p>
+                        </GlassCard>
+                    </div>
+
+                    <div
+                        className="transition-all duration-1000 delay-[1100ms]"
+                        style={{
+                            opacity: isVisible ? 1 : 0,
+                            transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(30px)'
+                        }}
+                    >
+                        <GlassCard hover className="text-center">
+                            <div className="w-16 h-16 mx-auto rounded-xl bg-[rgba(0,255,133,0.15)] border border-[rgba(0,255,133,0.3)] flex items-center justify-center mb-5">
+                                <Cpu className="w-8 h-8 text-[rgb(0,255,133)]" />
+                            </div>
+                            <h3 className="mb-2 text-lg">로봇공학</h3>
+                            <p className="text-[rgba(255,255,255,0.7)] text-sm">
+                                로봇 팔, 그리퍼 등
+                            </p>
+                        </GlassCard>
+                    </div>
+
+                    <div
+                        className="transition-all duration-1000 delay-[1200ms]"
+                        style={{
+                            opacity: isVisible ? 1 : 0,
+                            transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(30px)'
+                        }}
+                    >
+                        <GlassCard hover className="text-center">
+                            <div className="w-16 h-16 mx-auto rounded-xl bg-[rgba(0,255,133,0.15)] border border-[rgba(0,255,133,0.3)] flex items-center justify-center mb-5">
+                                <Beaker className="w-8 h-8 text-[rgb(0,255,133)]" />
+                            </div>
+                            <h3 className="mb-2 text-lg">의공학</h3>
+                            <p className="text-[rgba(255,255,255,0.7)] text-sm">
+                                의료 기기, 시스템 등
+                            </p>
+                        </GlassCard>
+                    </div>
+                </div>
+            </section>
+
+            {/* Final CTA Section */}
+            <section className="relative z-10 max-w-5xl mx-auto px-8 py-16">
+                <div
+                    className="transition-all duration-1000 delay-[1300ms]"
+                    style={{
+                        opacity: isVisible ? 1 : 0,
+                        transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(30px)'
+                    }}
+                >
+                    <GlassCard className="text-center py-12" glow>
+                        <h2 className="mb-3 text-3xl">
+                            <span className="text-[rgb(0,255,133)]">3D 학습</span>의 미래를 경험하세요
+                        </h2>
+                        <p className="text-[rgba(255,255,255,0.7)] text-base mb-8 max-w-xl mx-auto">
+                            지금 바로 시작하고 복잡한 공학 개념을 직관적으로 이해해보세요
+                        </p>
+                        <Button
+                            variant="primary"
+                            size="md"
+                            onClick={() => navigate('/signup')}
+                            icon={<Play className="w-4 h-4" />}
+                        >
+                            시작하기
+                        </Button>
+                    </GlassCard>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer
+                className="relative z-10 border-t border-[rgba(255,255,255,0.1)] py-8 transition-all duration-1000 delay-[1400ms]"
+                style={{
+                    opacity: isVisible ? 1 : 0
+                }}
+            >
+                <div className="max-w-7xl mx-auto px-8 flex items-center justify-between">
+                    <p className="text-[rgba(255,255,255,0.45)] text-sm">
+                        © 2026 SIMVEX. All rights reserved.
+                    </p>
+                    <div className="flex gap-6 text-sm text-[rgba(255,255,255,0.45)]">
+                        <a href="#" className="hover:text-[rgb(0,255,133)] transition-colors">이용약관</a>
+                        <a href="#" className="hover:text-[rgb(0,255,133)] transition-colors">개인정보처리방침</a>
+                        <a href="#" className="hover:text-[rgb(0,255,133)] transition-colors">문의하기</a>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }
