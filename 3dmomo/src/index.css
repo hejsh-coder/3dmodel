@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@theme {
+    --color-deep-space: #05050A;
+    --color-accent-gold: #F59E0B;
+    --font-sans: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--color-deep-space);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+}
+
+/* ✨ 유리 카드 스타일 (업그레이드) */
+.glass-card {
+    /* 반투명 배경 + 강력한 블러 */
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    /* 테두리 빛 반사 효과 (위쪽은 밝게, 아래쪽은 어둡게) */
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+
+    /* 그림자로 깊이감 추가 */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* 마우스 올렸을 때 빛나는 효과 */
+.glass-card:hover {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow:
+            0 0 20px rgba(255, 255, 255, 0.1), /* 은은한 광채 */
+            0 10px 40px rgba(0, 0, 0, 0.5);   /* 깊은 그림자 */
+    transform: translateY(-5px);
+}
+
+/* 나머지 스타일 유지 */
+.text-gradient-gold {
+    background: linear-gradient(to right, #ffffff 20%, #FCD34D 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.icon-3d {
+    filter: drop-shadow(0 8px 8px rgba(0,0,0,0.4));
+}
